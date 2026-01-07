@@ -19,16 +19,28 @@ def record_key(key_label, num_samples=10):
     
     print(f"\n--- RECORDING KEY: '{key_label}' ---")
     print(f"Please press '{key_label}' {num_samples} times with distinct pauses...")
-    
+
     # Simple recording logic (fixed duration for simplicity in this PoC)
     # In a pro version, you'd record continuously and detect onsets.
-    # Here we record 5 seconds which should fit 10 slow keystrokes.
-    DURATION = 10 
+    # Here we record 10 seconds which should fit 10 slow keystrokes.
+    DURATION = 10
+
+    print("Get ready to type...")
+    print("Recording will start in:")
+    print("3...")
+    import time
+    time.sleep(1)
+    print("2...")
+    time.sleep(1)
+    print("1...")
+    time.sleep(1)
+    print("🎵 RECORDING NOW! START TYPING! 🎵")
+
+    # Open stream AFTER countdown to avoid buffer overflow
     stream = p.open(format=FORMAT, channels=CHANNELS,
                     rate=RATE, input=True,
                     frames_per_buffer=CHUNK)
-    
-    print("Recording... Start typing!")
+
     frames = []
     for _ in range(0, int(RATE / CHUNK * DURATION)):
         data = stream.read(CHUNK)
@@ -85,9 +97,18 @@ def segment_audio(file_path, key_label):
 
 # --- RUNNER ---
 if __name__ == "__main__":
-    # Let's train on 3 distinct keys first
-    keys_to_record = ["Space", "Enter", "A"] 
-    
+    # Record all alphabetical letters (A-Z), numbers (0-9), and Enter/Space
+    import string
+    letters = list(string.ascii_uppercase)  # A-Z
+    numbers = [str(i) for i in range(10)]    # 0-9
+    special_keys = ["Enter", "Space"]
+
+    keys_to_record = letters + numbers + special_keys
+
+    print(f"Will record {len(keys_to_record)} keys: {keys_to_record}")
+    print("This will take approximately", len(keys_to_record) * 10, "seconds of recording time")
+    input("Press Enter to start recording all keys...")
+
     for key in keys_to_record:
         raw_file = record_key(key, num_samples=10)
         segment_audio(raw_file, key)
